@@ -73,7 +73,7 @@ function parseData(message) {
 	//	return
 
 	// sometimes the data comes with another level of nesting, so we unnest
-	if (sub_data['code'] && sub_data['data'] in sub_data){// and type(sub_data['data']) is dict:
+	if (sub_data['code'] && sub_data['data']){// and type(sub_data['data']) is dict:
 		sub_data = sub_data['data']
 	}
 
