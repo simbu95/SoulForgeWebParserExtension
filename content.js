@@ -83,23 +83,23 @@ function parseData(message) {
 		parse_as_node_obj(sub_data)
 	}
 	if (sub_data['location'] != undefined && sub_data['environment'] != undefined) {
-		self.parse_as_node_env(sub_data)
+		parse_as_node_env(sub_data)
 	}
 	if (sub_data['density'] != undefined) {
-		self.parse_as_resource_data(sub_data)
+		parse_as_resource_data(sub_data)
 	}
 	if (sub_data['amount'] != undefined) {
-		self.parse_as_inventory_data(sub_data)
+		parse_as_inventory_data(sub_data)
 	}
 	if (sub_data['hostile'] != undefined) {
-		self.parse_as_enemy_data(sub_data)
+		parse_as_enemy_data(sub_data)
 	}
 	if (sub_data['avatar'] != undefined && sub_data['name'] != undefined && sub_data['effects'] != undefined) { //This will only print avatars if you see their name... Both good and bad I guess. Honestly might dump avatars. 
-		self.parse_as_avatar_data(sub_data)
+		parse_as_avatar_data(sub_data)
 	}
 	
 	if (sub_data['operation'] != undefined && sub_data['operation']['type']== 'TravelOperation') {
-		self.parse_as_path_data(sub_data['operation']['context'])
+		parse_as_path_data(sub_data['operation']['context'])
 	}
 }
 
@@ -120,8 +120,6 @@ function parse_as_node_obj(message_data){
 function parse_as_node_env(message_data) {
 	location_id = message_data['location']
 }
-	//self.engine.write_node_attr(location_id, spacing, terrain)
-	//self.engine.write_node_weather(timestamp, location_id, **env_statuses)
 
 function parse_as_resource_data(message_data) {
 	res_id = message_data['id'];
