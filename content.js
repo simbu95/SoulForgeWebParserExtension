@@ -48,7 +48,6 @@ wsHook.after = function(messageEvent, url, wsObject) {
 
 //For creatures, create a list of all images and creatue names, and use the images to link to the creature name during print.
 
-
 name_pattern = /\{[a-f\d]+:\d+:(.+)}/
 LocationDataArray = {};
 ResourceDataBase = {};
@@ -115,17 +114,7 @@ function parse_as_node_obj(message_data){
 			img.file(`${location_id}.jpg`, myBlob, {base64: true});
 		});
 	}
-	LocationDataArray[location_id] = {'RES' : message_data['resources'], 'INV' : message_data['inventory'], 'CRE' : message_data['creatures'], 'SPACE' : message_data['spacing']};//, 'PATHS' = message_data['paths'] };
-	//LocationDataArray[location_id] = {'RES':{},'CRE':{},'AVA':{},'SPACE':message_data['spacing'],'PATHS' = message_data['paths'] }
-	// Could add accident and position to paths, but meh. 
-	// Action Points could be fun, but need a lot of info to make that work, seems to not just be listed, maybe only there when you click the travel action. 
-	//Maybe better to mark things as stale and reset when looking at creatures. If someone gets a node refresh but not looking at location tab, might not get creature and resource data. 
-	/*message_data['resources'].forEach(function(res_id){
-		LocationDataArray[location_id][`RES${res_id}`] = {'density': 0, 'name': 'Unknown', 'icon': 'Unknown'};
-	});
-	message_data['creatures'].forEach(function(creature_id){
-		LocationDataArray[location_id][`CRE${creature_id}`] = {'hostile': false, 'name': 'Unknown', 'icon': 'Unknown', nonAggressive: false};
-	});*/
+	LocationDataArray[location_id] = {'RES' : message_data['resources'], 'INV' : message_data['inventory'], 'CRE' : message_data['creatures'], 'PATHS' : message_data['paths'], 'SPACE' : message_data['spacing'] };
 }
 
 function parse_as_node_env(message_data) {
@@ -136,27 +125,16 @@ function parse_as_node_env(message_data) {
 
 function parse_as_resource_data(message_data) {
 	res_id = message_data['id'];
-	name = name_pattern.exec(message_data['name'])[1];//player_name_pattern.match(message_data['name']).groups()[0]
+	if (message_data['name'] == 'Fishing spot') {
+		name = 'Fish';
+	}
+	else {
+		name = name_pattern.exec(message_data['name'])[1]; //I don't like this because its unstable. Would like to make it work right. 
+	}
 	//name = name[name.length-1]
 	density = message_data['density'];
 	icon = message_data['icon'].slice(9); //Removes /api/res/ from the image name.
 	ResourceDataBase[res_id]= { 'density': density, 'name' : name, 'image': icon};
-	/*if(LocationDataArray[GlobalLocationID]){  //You could probably just add stuff, and reset it when you receive a new update on the node. That way its a list of resources, and less cumbersome. 
-		if(LocationDataArray[GlobalLocationID]['RES']['STALE']) {
-			LocationDataArray[GlobalLocationID]['RES'] = {'STALE':false}
-		}
-		LocationDataArray[GlobalLocationID]['RES'][res_id] = { 'density': density, 'name' : name, 'image': icon};
-		//if(LocationDataArray[GlobalLocationID][`RES${res_id}`]){ //No one really cares about the ID of the stuff on the node if none of the other data is there. 
-			
-			//LocationDataArray[GlobalLocationID][`RES${res_id}`]['density'] = density; //All the current thing does is let you know there were resources, but not what or density or anything. 
-			//LocationDataArray[GlobalLocationID][`RES${res_id}`]['name'] = name; //I agree, taking it out for now. Commes in parse as node obj if you want to go back.
-			//LocationDataArray[GlobalLocationID][`RES${res_id}`]['image'] = icon; //Just need to convert to an actual array instead I guess, but this is fine too. 
-			return
-		//}
-	}
-	
-	console.log("Unexpected Node Received")
-	//console.log("Unexpected Resource found")*/
 }
 
 function parse_as_inventory_data(message_data) {
@@ -179,45 +157,26 @@ function parse_as_enemy_data(message_data) {
 			EnemyNameMap[icon] = name_pattern.exec(message_data['name'])[1]
 		}
 	}
-	/*if(LocationDataArray[GlobalLocationID]){
-		if(LocationDataArray[GlobalLocationID]['CRE']['STALE']) {
-			LocationDataArray[GlobalLocationID]['CRE'] = {'STALE':false}
-		}
-		LocationDataArray[GlobalLocationID][`CRE${enemy_id}`] = { 'hostile': true, 'nonAggressive' : nonAggressive, 'image': icon};
-		if(message_data['name'] != undefined) {
-			if(EnemyNameMap[icon] != undefined) {
-				EnemyNameMap[icon] = name_pattern.exec(message_data['name'])[1]
-			}
-		}
-		return
-		//if(LocationDataArray[GlobalLocationID][`CRE${enemy_id}`]){
-			//[GlobalLocationID][`CRE${enemy_id}`]['nonAggressive'] = nonAggressive;
-			//LocationDataArray[GlobalLocationID][`CRE${enemy_id}`]['image'] = icon;
-			
-		//}
-	}
-	console.log("Unexpected Node Received")
-	//console.log("Unexpected Resource found")*/
 }
 
 function parse_as_avatar_data(message_data) {
 	CreatureDataBase[message_data['id']] = { 'hostile': false, 'name': message_data['name']};
-	/*if(LocationDataArray[GlobalLocationID]) { 
-		if(LocationDataArray[GlobalLocationID]['AVA']['STALE']) {
-			LocationDataArray[GlobalLocationID]['AVA'] = {'STALE':false}
-		}
-		LocationDataArray[GlobalLocationID]['AVA'][message_data['avatar']] = message_data['name']*/
 }
 
 function parse_as_path_data(message_data) {
 	myData = {};
 	myData['pathID'] = message_data['pathId'];
 	myData['action_cost'] = message_data['unitCost'];
-	myData['action_speed'] = message_data['skillInfo']['finalSpeed'];
-	myData['travel_skill'] = message_data['skillInfo']['skill'];
-	myData['skill_level'] = message_data['skillInfo']['skillLevel'];
-	myData['accident_chance'] = message_data['skillInfo']['accidentChance'];
-	myData['accident_severity'] = message_data['skillInfo']['accidentSeverity'];
+	if(message_data['skillInfo'] == undefined){
+		myData['travel_skill'] = "None"
+	}
+	else {
+		myData['action_speed'] = message_data['skillInfo']['finalSpeed'];
+		myData['travel_skill'] = message_data['skillInfo']['skill'];
+		myData['skill_level'] = message_data['skillInfo']['skillLevel'];
+		myData['accident_chance'] = message_data['skillInfo']['accidentChance'];
+		myData['accident_severity'] = message_data['skillInfo']['accidentSeverity'];
+	}
 	PathDataBase.push(myData);
 }
 
