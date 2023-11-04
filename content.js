@@ -141,7 +141,11 @@ function parse_as_inventory_data(message_data) {
 	amount = message_data['amount'];
 	durabilityStage = message_data['durabilityStage'];
 	icon = message_data['icon'].slice(9); //Removes /api/res/ from the image name.
-	ObjectDataBase[res_id] = {'name': name,'amount':amount,'durabilityStage':durabilityStage,'image':icon}
+	quality = -1;
+	if(message_data['quality'] != undefined) {
+		quality = message_data['quality'];
+	}
+	ObjectDataBase[res_id] = {'name': name,'amount':amount,'quality':quality,'durabilityStage':durabilityStage,'image':icon}
 }
 
 function parse_as_enemy_data(message_data) {
