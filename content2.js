@@ -72,7 +72,7 @@ function parse_as_node_obj(message_data){
             a.onloadend = function () {
                 let hashPromise = hash(a.result);// it outputs a promise
                 hashPromise.then((hash) => {
-                    fetch("http://127.0.0.1/SubmitNodeData", { 
+                    fetch("https://149.76.213.199/SubmitNodeData", { 
                         method: "POST",
                         body: JSON.stringify({"id" : location_id, "hash": hash}),
                         headers: {
@@ -83,7 +83,7 @@ function parse_as_node_obj(message_data){
                         if(data == "NEED"){
                             let formData = new FormData();
                             formData.append("ufile", lastBlob, location_id + '.jpg');   
-                            fetch("http://127.0.0.1/uploadLink", { 
+                            fetch("https://149.76.213.199/uploadLink", { 
                                 method: "POST",
                                 body: formData
                             })
